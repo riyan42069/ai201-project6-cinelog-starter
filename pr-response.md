@@ -1,7 +1,24 @@
 # PR Response Doc — CineLog Watchlist Feature
 
 ## AI Usage
-<!-- Fill in at the end — how you used AI tools during this project -->
+I used Claude Code for three things:
+
+1. **Comment 1:** searched the repo for every call site of
+   `save_to_watchlist` before and after the rename, to confirm nothing was
+   missed.
+
+2. **Comment 6:** after the rebase showed no conflicts, I asked it to check
+   the watchlist code against the new UUID models. It found that main's
+   UUID migration had silently dropped `WatchlistEntry` from `models.py`
+   during the rebase (no conflict, just a missing class). I verified this
+   against the commit history myself, then had it help restore the class
+   with a UUID `film_id`.
+
+3. **Comments 4 and 5:** asked it to help draft my reasoning. I had it
+   trim Comment 4 down to the core argument and tradeoff, and for Comment 5
+   I used it to help state the one real case for alphabetical order so my
+   response engaged with it. The positions are mine; AI helped write them
+   up clearly.
 
 ## Comment 1 — Rename
 **What I did:** I renamed `save_to_watchlist()` to `add_to_watchlist()` in
@@ -146,3 +163,5 @@ Tradeoff: a watchlist can expose more than a "watched" collection (unfinished
 or embarrassing picks), and with `public=True` that exposure happens before
 the user opts in. If that causes real user complaints, we should revisit
 the default or prompt for visibility at add-time.
+
+![alt text](image.png)
