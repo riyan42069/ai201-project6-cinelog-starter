@@ -100,9 +100,37 @@ it's a strong enough case to keep alphabetical as the default. I made the
 change rather than just agreeing in words.
 
 ## Comment 6 — Rebase
-**What conflicted:**
-**How I resolved it:**
-**How I verified no conflict remains:**
+**What conflicted:** When I ran `git fetch origin` and `git rebase
+origin/main`, the first thing that stopped me wasn't a real conflict, it
+was an untracked `.gitignore` file on my machine that would have been
+overwritten by the one already committed on main. I removed my local copy
+since main's version already covered the same things plus a bit more.
+
+After that, the rebase itself finished without showing any conflict
+markers, but that turned out to be misleading. Main had a commit that
+migrated `Film.id` and `CollectionEntry.film_id` from plain integers to
+UUID strings, and rewrote models.py to match. That commit came from before
+the watchlist feature existed on main, so it never included
+`WatchlistEntry` at all. Since none of my own commits had touched
+models.py, git didn't see any changes on my side to conflict with, so it
+just quietly kept main's version of the file, which meant `WatchlistEntry`
+disappeared from the codebase completely. No error, no conflict markers,
+just a missing class.
+
+**How I resolved it:** I added `WatchlistEntry` back into models.py, using
+`db.String(36)` for `film_id` so it matches the new UUID style used by
+`Film.id` and `CollectionEntry.film_id`, instead of the old integer column.
+Then I went through the watchlist code and tests and cleaned up anything
+still written as if `film_id` were an integer: the docstring in
+`add_to_watchlist()`, the example request body in the route file, and the
+fake film id used in `test_watchlist.py`, which I changed from a fake
+integer to a fake UUID string.
+
+**How I verified no conflict remains:** I ran `pytest tests/ -v` and all
+five tests passed, including the new watchlist test. I also checked
+`git log --oneline --merges origin/main..HEAD`, which came back empty,
+confirming the rebase didn't add any merge commits and my branch history
+is still a straight line on top of main.
 
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
